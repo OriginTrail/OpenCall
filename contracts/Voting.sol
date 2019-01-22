@@ -135,7 +135,7 @@ contract Voting is Ownable {
 
 			if (wallets[i] == address(0) && ERC725Addresses[i] == address(0)) {
 				emit WalletRejected(wallets[i], ERC725Addresses[i], 
-						"Cannot verify an empty wallet!");
+						"Cannot verify an empty application!");
 			}
 			else {
 				if(ERC725Addresses[i] != address(0)) {
