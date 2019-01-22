@@ -133,45 +133,19 @@ contract Voting is Ownable {
 		for(i = 0; i < wallets.length && i < 50; i = i + 1) {
 			walletApproved[wallets[i]] = false;
 
-			if (wallets[i] == address(0) && ERC725Addresses[i] == address(0)) {
+			if (wallets[i] == address(0) || ERC725Addresses[i] == address(0)) {
 				emit WalletRejected(wallets[i], ERC725Addresses[i], 
-						"Cannot verify an empty application!");
+						"Cannot verify an empty wallet!");
 			}
 			else {
 				if(ERC725Addresses[i] != address(0)) {
-					// ERC725 (and optionally wallet) was submitted
-						// -> Verify ownership and balance in (either the wallet or) profile and approve both
-					if(ERC725(ERC725Addresses[i]).keyHasPurpose(keccak256(abi.encodePacked(wallets[i])), 1)) {
-						if(profileStorageContract.getStake(ERC725Addresses[i]) >= 10^21) {
-							walletApproved[ERC725Addresses[i]] = true;
-
-							if(wallets[i] != address(0)){
-								walletApproved[wallets[i]] = true;
-							}
-
-							emit WalletApproved(wallets[i], ERC725Addresses[i]);
-						}
-						else {
-							if(wallets[i] != address(0)){
-								if(tokenContract.balanceOf(wallets[i]) >= 10^21) {
-									walletApproved[ERC725Addresses[i]] = true;
-									walletApproved[wallets[i]] = true;
-									emit WalletApproved(wallets[i], ERC725Addresses[i]);
-								}
-								else {
-									emit WalletRejected(wallets[i], ERC725Addresses[i],
-										"Neither profile nor wallet have at least 1000 trac at the time of approval!");
-								}
-							}
-							else {
-								emit WalletRejected(wallets[i], ERC725Addresses[i],
-									"Profile does not have at least 1000 trac at the time of approval!");
-							}
-						}
+					if(profileStorageContract.getStake(ERC725Addresses[i]) >= 10^21) {
+						walletApproved[ERC725Addresses[i]] = true;
+						emit WalletApproved(address(0), ERC725Addresses[i]);
 					}
 					else {
-						emit WalletRejected(wallets[i], ERC725Addresses[i],
-							"Wallet is not a management wallet for the submitted ERC725Address!");
+						emit WalletRejected(wallets[i], ERC725Addresses[i], 
+							"Profile does not have at least 1000 trac at the time of approval!");
 					}	
 				}
 				else {
@@ -179,10 +153,10 @@ contract Voting is Ownable {
 						// -> Verify wallet balance and approve wallet
 					if(tokenContract.balanceOf(wallets[i]) >= 10^21) {
 						walletApproved[wallets[i]] = true;
-						emit WalletApproved(wallets[i], ERC725Addresses[i]);
+						emit WalletApproved(wallets[i], address(0));
 					}
 					else {
-						emit WalletRejected(wallets[i], ERC725Addresses[i], 
+						emit WalletRejected(wallets[i], address(0), 
 							"Wallet does not have at least 1000 trac at the time of approval!");
 					}
 				}
@@ -239,8 +213,7 @@ contract Voting is Ownable {
 		require(votingClosingTime != 0, "Voting has not yet started!");
 		require(votingClosingTime >= block.timestamp, "Voting period has expired!");
 		
-		require(walletApproved[msg.sender] == true || walletApproved[ERC725Address] == true,
-			"Sender is not approved and thus cannot vote!");
+		require(walletApproved[msg.sender] == true || walletApproved[ERC725Address] == true, "Sender is not approved and thus cannot vote!");
 
 		require(walletVoted[msg.sender] == false, "Sender already voted!");
 		require(walletVoted[ERC725Address] == false, "Profile was already used for voting!");
