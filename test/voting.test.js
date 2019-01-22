@@ -181,7 +181,7 @@ contract('Voting tests', async (accounts) => {
         const voterWallets = [accounts[emptyWalletEmptyProfile]];
         const voterIdentities = [identities[emptyWalletEmptyProfile]];
 
-        const expectedErrorMessage = 'Neither wallet nor profile have at least 1000 trac at the time of approval';
+        const expectedErrorMessage = 'Profile does not have at least 1000 trac at the time of approval';
 
         let balance = await trac.balanceOf(accounts[emptyWalletEmptyProfile]);
         assert(balance.isZero(), `Wallet balance not zero, but actually ${balance.toString()}`);
@@ -234,27 +234,11 @@ contract('Voting tests', async (accounts) => {
     });
 
     // eslint-disable-next-line no-undef
-    it('Should fail by giving approval to a wallet which is not a management wallet', async () => {
-        const voterWallets = [accounts[0]];
-        const voterIdentities = [identities[1]];
-
-        const expectedErrorMessage = 'Wallet is not a management wallet for the submitted ERC725Address';
-
-        const res = await voting.approveMultipleWallets(voterWallets, voterIdentities);
-        const approval = await voting.walletApproved.call(voterWallets[0]);
-        assert(approval === false, 'Approval did not fail!');
-        assert(
-            JSON.stringify(res).includes(expectedErrorMessage),
-            `Incorrect error thrown! Received: \n${JSON.stringify(res)}`,
-        );
-    });
-
-    // eslint-disable-next-line no-undef
     it('Should fail by giving approval to an empty wallet', async () => {
         const voterWallets = ['0x0000000000000000000000000000000000000000'];
-        const voterIdentities = [identities[0]];
+        const voterIdentities = ['0x0000000000000000000000000000000000000000'];
 
-        const expectedErrorMessage = 'Cannot verify an empty wallet';
+        const expectedErrorMessage = 'Cannot verify an empty application';
 
         const res = await voting.approveMultipleWallets(voterWallets, voterIdentities);
         const approval = await voting.walletApproved.call(voterWallets[0]);
@@ -284,17 +268,17 @@ contract('Voting tests', async (accounts) => {
 
         const promises = [];
         for (let i = voterWallets.length - 1; i >= 0; i -= 1) {
-            promises[i] = voting.walletApproved.call(voterWallets[i]);
+            promises[i] = voting.walletApproved.call(voterIdentities[i]);
         }
         const results = await Promise.all(promises);
 
         for (let i = results.length - 1; i >= 0; i -= 1) {
-            assert(results[i] === true, `Wallet ${voterWallets[i]} does not have approval!`);
+            assert(results[i] === true, `Identity ${voterIdentities[i]} does not have approval!`);
         }
     });
 
     // eslint-disable-next-line no-undef
-    it('Should test giving approval to a wallet with profile and enough tokens in wallet', async () => {
+    it.skip('Should test giving approval to a wallet with profile and enough tokens in wallet', async () => {
         const voterWallets = [accounts[fullWalletEmptyProfile]];
         const voterIdentities = [identities[fullWalletEmptyProfile]];
 
@@ -302,12 +286,12 @@ contract('Voting tests', async (accounts) => {
 
         const promises = [];
         for (let i = voterWallets.length - 1; i >= 0; i -= 1) {
-            promises[i] = voting.walletApproved.call(voterWallets[i]);
+            promises[i] = voting.walletApproved.call(voterIdentities[i]);
         }
         const results = await Promise.all(promises);
 
         for (let i = results.length - 1; i >= 0; i -= 1) {
-            assert(results[i] === true, `Wallet ${voterWallets[i]} does not have approval!`);
+            assert(results[i] === true, `Identity ${voterIdentities[i]} does not have approval!`);
         }
     });
 
@@ -320,12 +304,12 @@ contract('Voting tests', async (accounts) => {
 
         const promises = [];
         for (let i = voterWallets.length - 1; i >= 0; i -= 1) {
-            promises[i] = voting.walletApproved.call(voterWallets[i]);
+            promises[i] = voting.walletApproved.call(voterIdentities[i]);
         }
         const results = await Promise.all(promises);
 
         for (let i = results.length - 1; i >= 0; i -= 1) {
-            assert(results[i] === true, `Wallet ${voterWallets[i]} does not have approval!`);
+            assert(results[i] === true, `Identity ${voterIdentities[i]} does not have approval!`);
         }
     });
 
@@ -356,19 +340,19 @@ contract('Voting tests', async (accounts) => {
 
         const promises = [];
         for (let i = voterWallets.length - 1; i >= 0; i -= 1) {
-            promises[i] = voting.walletApproved.call(voterWallets[i]);
+            promises[i] = voting.walletApproved.call(voterIdentities[i]);
         }
         const results = await Promise.all(promises);
 
         for (let i = results.length - 1; i >= 0; i -= 1) {
-            assert(results[i] === true, `Wallet ${voterWallets[i]} does not have approval!`);
+            assert(results[i] === true, `Identity ${voterIdentities[i]} does not have approval!`);
         }
     });
 
     // eslint-disable-next-line no-undef
     it('Should test giving approval to multiple wallets without profiles', async () => {
-        const voterWallets = [accounts[4], accounts[5]];
-        const voterIdentities = ['0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000'];
+        const voterWallets = [accounts[3], accounts[4], accounts[5], accounts[fullWalletEmptyProfile]];
+        const voterIdentities = ['0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000'];
 
         await voting.approveMultipleWallets(voterWallets, voterIdentities);
 
@@ -692,8 +676,8 @@ contract('Voting tests', async (accounts) => {
 
         const expectedErrorMessage = 'Must vote for 3 candidates';
 
-        const approval = await voting.walletApproved.call(accounts[1]);
-        assert(approval === true, 'Wallet does not have approval');
+        const approval = await voting.walletApproved.call(identities[0]);
+        assert(approval === true, 'Identity does not have approval');
 
         try {
             await voting.voteWithProfile(
@@ -712,7 +696,7 @@ contract('Voting tests', async (accounts) => {
         try {
             await voting.vote(
                 votes,
-                { from: accounts[0] },
+                { from: accounts[3] },
             );
             assert(false, 'Voting did not fail!');
         } catch (error) {
@@ -741,7 +725,7 @@ contract('Voting tests', async (accounts) => {
         try {
             await voting.vote(
                 votes,
-                { from: accounts[0] },
+                { from: accounts[3] },
             );
             assert(false, 'Voting did not fail!');
         } catch (error) {
@@ -770,7 +754,7 @@ contract('Voting tests', async (accounts) => {
         try {
             await voting.vote(
                 votes,
-                { from: accounts[0] },
+                { from: accounts[3] },
             );
             assert(false, 'Voting did not fail!');
         } catch (error) {
@@ -790,9 +774,6 @@ contract('Voting tests', async (accounts) => {
 
         const expectedErrorMessage = 'The selected candidate does not exist';
 
-        const approval = await voting.walletApproved.call(accounts[0]);
-        assert(approval === true, 'Wallet does not have approval');
-
         try {
             await voting.voteWithProfile(
                 votes,
@@ -810,7 +791,7 @@ contract('Voting tests', async (accounts) => {
         try {
             await voting.vote(
                 votes,
-                { from: accounts[0] },
+                { from: accounts[3] },
             );
             assert(false, 'Voting did not fail!');
         } catch (error) {
@@ -830,8 +811,8 @@ contract('Voting tests', async (accounts) => {
 
         const expectedErrorMessage = 'Cannot cast multiple votes for the same person';
 
-        const approval = await voting.walletApproved.call(accounts[0]);
-        assert(approval === true, 'Wallet does not have approval');
+        const approval = await voting.walletApproved.call(identities[0]);
+        assert(approval === true, 'Identity does not have approval');
 
         try {
             await voting.voteWithProfile(
@@ -850,7 +831,7 @@ contract('Voting tests', async (accounts) => {
         try {
             await voting.vote(
                 votes,
-                { from: accounts[0] },
+                { from: accounts[3] },
             );
             assert(false, 'Voting did not fail!');
         } catch (error) {
@@ -877,8 +858,8 @@ contract('Voting tests', async (accounts) => {
             initialVotes[i] = initialVotes[i].votes;
         }
 
-        const approval = await voting.walletApproved.call(accounts[0]);
-        assert(approval === true, 'Wallet does not have approval');
+        const approval = await voting.walletApproved.call(identities[0]);
+        assert(approval === true, 'Identity does not have approval');
 
         await voting.voteWithProfile(
             votes,
@@ -918,8 +899,8 @@ contract('Voting tests', async (accounts) => {
             initialVotes[i] = initialVotes[i].votes;
         }
 
-        const approval = await voting.walletApproved.call(accounts[emptyWalletFullProfile]);
-        assert(approval === true, 'Wallet does not have approval');
+        const approval = await voting.walletApproved.call(identities[emptyWalletFullProfile]);
+        assert(approval === true, 'Identity does not have approval');
 
         await voting.voteWithProfile(
             votes,
@@ -1031,7 +1012,7 @@ contract('Voting tests', async (accounts) => {
 
         const expectedErrorMessage = 'Sender already voted';
 
-        const approval = await voting.walletApproved.call(accounts[0]);
+        const approval = await voting.walletApproved.call(identities[0]);
         assert(approval === true, 'Wallet does not have approval');
         const voted = await voting.walletVoted.call(accounts[0]);
         assert(voted === true, 'Wallet marked as not yet voted');
@@ -1053,7 +1034,7 @@ contract('Voting tests', async (accounts) => {
         try {
             await voting.vote(
                 votes,
-                { from: accounts[0] },
+                { from: accounts[1] },
             );
             assert(false, 'Voting did not fail!');
         } catch (error) {
