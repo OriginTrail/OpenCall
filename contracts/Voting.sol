@@ -190,20 +190,20 @@ contract Voting is Ownable {
 		require(candidateIndexes[1] != candidateIndexes[2], "Cannot cast multiple votes for the same person!");
 		require(candidateIndexes[2] != candidateIndexes[0], "Cannot cast multiple votes for the same person!");
 
-		require(candidateIndexes[0] >= 0 && candidateIndexes[0] <= 33, "The selected candidate does not exist!");
-		require(candidateIndexes[1] >= 0 && candidateIndexes[1] <= 33, "The selected candidate does not exist!");
-		require(candidateIndexes[2] >= 0 && candidateIndexes[2] <= 33, "The selected candidate does not exist!");
+		require(candidateIndexes[0] >= 0 && candidateIndexes[0] < candidates.length, "The selected candidate does not exist!");
+		require(candidateIndexes[1] >= 0 && candidateIndexes[1] < candidates.length, "The selected candidate does not exist!");
+		require(candidateIndexes[2] >= 0 && candidateIndexes[2] < candidates.length, "The selected candidate does not exist!");
 
 		walletVoted[msg.sender] = true;
 		emit WalletVoted(msg.sender, candidates[candidateIndexes[0]].name, candidates[candidateIndexes[1]].name, candidates[candidateIndexes[2]].name);
 
-		assert(candidates[candidateIndexes[0]].votes + 3 >= candidates[candidateIndexes[0]].votes);
+		assert(candidates[candidateIndexes[0]].votes + 3 > candidates[candidateIndexes[0]].votes);
 		candidates[candidateIndexes[0]].votes = candidates[candidateIndexes[0]].votes + 3;		
 
-		assert(candidates[candidateIndexes[1]].votes + 2 >= candidates[candidateIndexes[1]].votes);
+		assert(candidates[candidateIndexes[1]].votes + 2 > candidates[candidateIndexes[1]].votes);
 		candidates[candidateIndexes[1]].votes = candidates[candidateIndexes[1]].votes + 2;		
 	
-		assert(candidates[candidateIndexes[2]].votes + 1 >= candidates[candidateIndexes[2]].votes);
+		assert(candidates[candidateIndexes[2]].votes + 1 > candidates[candidateIndexes[2]].votes);
 		candidates[candidateIndexes[2]].votes = candidates[candidateIndexes[2]].votes + 1;		
 	
 		require(tokenContract.balanceOf(msg.sender) >= 10^21, "Sender does not have at least 1000 TRAC and thus cannot vote!");
@@ -224,21 +224,21 @@ contract Voting is Ownable {
 		require(candidateIndexes[1] != candidateIndexes[2], "Cannot cast multiple votes for the same person!");
 		require(candidateIndexes[2] != candidateIndexes[0], "Cannot cast multiple votes for the same person!");
 
-		require(candidateIndexes[0] >= 0 && candidateIndexes[0] <= 33, "The selected candidate does not exist!");
-		require(candidateIndexes[1] >= 0 && candidateIndexes[1] <= 33, "The selected candidate does not exist!");
-		require(candidateIndexes[2] >= 0 && candidateIndexes[2] <= 33, "The selected candidate does not exist!");
+		require(candidateIndexes[0] >= 0 && candidateIndexes[0] < candidates.length, "The selected candidate does not exist!");
+		require(candidateIndexes[1] >= 0 && candidateIndexes[1] < candidates.length, "The selected candidate does not exist!");
+		require(candidateIndexes[2] >= 0 && candidateIndexes[2] < candidates.length, "The selected candidate does not exist!");
 
 		walletVoted[msg.sender] = true;
 		walletVoted[ERC725Address] = true;
 		emit WalletVoted(msg.sender, candidates[candidateIndexes[0]].name, candidates[candidateIndexes[1]].name, candidates[candidateIndexes[2]].name);
 		
-		assert(candidates[candidateIndexes[0]].votes + 3 >= candidates[candidateIndexes[0]].votes);
+		assert(candidates[candidateIndexes[0]].votes + 3 > candidates[candidateIndexes[0]].votes);
 		candidates[candidateIndexes[0]].votes = candidates[candidateIndexes[0]].votes + 3;		
 
-		assert(candidates[candidateIndexes[1]].votes + 2 >= candidates[candidateIndexes[1]].votes);
+		assert(candidates[candidateIndexes[1]].votes + 2 > candidates[candidateIndexes[1]].votes);
 		candidates[candidateIndexes[1]].votes = candidates[candidateIndexes[1]].votes + 2;		
 	
-		assert(candidates[candidateIndexes[2]].votes + 1 >= candidates[candidateIndexes[2]].votes);
+		assert(candidates[candidateIndexes[2]].votes + 1 > candidates[candidateIndexes[2]].votes);
 		candidates[candidateIndexes[2]].votes = candidates[candidateIndexes[2]].votes + 1;		
 
 		require(ERC725(ERC725Address).keyHasPurpose(keccak256(abi.encodePacked(msg.sender)), 2), 
